@@ -1,0 +1,19 @@
+{
+  "name": "pufferschat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "http": "^0.0.1-security",
+    "mongoose": "^7.2.3",
+    "ngrok": "^5.0.0-beta.2",
+    "socket.io": "^4.6.2"
+  }
+}

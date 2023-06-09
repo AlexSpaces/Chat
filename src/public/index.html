@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PuffersChat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: black;
+      color: white;
+      font-family: monospace;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #messages {
+      margin-bottom: 20px;
+    }
+
+    #message-list {
+      list-style-type: none;
+      padding: 0;
+      overflow-y: scroll;
+      height: 80vh;
+      background-color: black;
+      color: white;
+      padding: 10px;
+    }
+
+    #message-list li {
+      margin-bottom: 10px;
+    }
+
+    #message-list li strong {
+      margin-right: 5px;
+      color: cyan;
+    }
+
+    #message-form {
+      display: flex;
+    }
+
+    #message-input {
+      flex: 1;
+      margin-right: 10px;
+      background-color: black;
+      color: white;
+      border: none;
+      padding: 5px;
+      font-family: monospace;
+      caret-color: cyan;
+    }
+
+    #message-submit {
+      width: 80px;
+      background-color: cyan;
+      color: black;
+      border: none;
+      padding: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 12pt;
+    }
+
+    .blinking-cursor {
+      display: inline-block;
+      width: 10px;
+      height: 20px;
+      background-color: rgb(0, 0, 0);
+      animation: blink-animation 1s steps(2, start) infinite;
+    }
+
+    @keyframes blink-animation {
+      to {
+        visibility: hidden;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>PuffersChat</h1>
+
+  <div id="messages">
+    <ul id="message-list"></ul>
+  </div>
+
+  <form id="message-form">
+    <input type="text" id="message-input" placeholder="Enter your message" autocomplete="off">
+    <input type="submit" id="message-submit" value="Send">
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const messageList = document.getElementById('message-list');
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+    const blinkingCursor = document.createElement('span');
+    blinkingCursor.classList.add('blinking-cursor');
+    messageInput.parentNode.appendChild(blinkingCursor);
+
+    const addMessage = (message) => {
+      const listItem = document.createElement('li');
+      const strong = document.createElement('strong');
+      strong.textContent = `@${message.user}: `;
+      listItem.appendChild(strong);
+      listItem.appendChild(document.createTextNode(message.content));
+      messageList.appendChild(listItem);
+      messageList.scrollTop = messageList.scrollHeight; // Auto-scroll to the bottom
+    };
+
+    socket.on('messages', (messages) => {
+      messages.forEach(addMessage);
+    });
+
+    socket.on('message', (message) => {
+      addMessage(message);
+    });
+
+    messageForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const content = messageInput.value.trim();
+      if (content) {
+        const user = localStorage.getItem('username');
+        const message = { user, content };
+        socket.emit('message', message);
+        messageInput.value = '';
+      }
+    });
+
+    const username = localStorage.getItem('username');
+    if (!username) {
+      const promptUsername = () => {
+        const input = prompt('Enter your username:');
+        if (input) {
+          localStorage.setItem('username', input);
+        } else {
+          promptUsername();
+        }
+      };
+      promptUsername();
+    }
+  </script>
+</body>
+</html>
